@@ -38,6 +38,7 @@ Braden: redbmk@gmail.com
 #### v0.0.2
 * Added ability to freeze time using spacebar.
 * Freezing time creates a trail of where you've just been.
+
 #### v0.0.1
 * Just getting started.
 * You can move a dot around.
