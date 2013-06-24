@@ -1,4 +1,4 @@
-# License
+/*
     Copyright © 2013  Braden Michael Kelley
 
     This program is free software: you can redistribute it and/or modify
@@ -13,26 +13,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-# Contact
-    redbmk@gmail.com
-
-# Notes
-    * This game currently has no name.
-    * It's a game about time travel
-    * The version of crafty.js included was compiled from the develop branch
-      and includes the Shape plugin from https://github.com/luizbills/CraftyShape
-
-# Controls
-#### Movement
-    w: up
-    s: down
-    a: left
-    d: right
-
-#### Other
-    g: spawn a ghost that repeats your comands from the start
-
-# Changelog
-    Just getting started. You can move a dot around and spawn as many
-    ghosts/clones as you want.
+body {
+    margin: 0;
+}
