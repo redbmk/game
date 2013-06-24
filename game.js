@@ -22,25 +22,44 @@ var protagonist, time, history, ghost;
 
     history = [];
 
-    function spawnGhost() {
-        Crafty.e('2D, DOM, Color, Multiway')
-            .color('rgba(0,0,255,.4)')
-            .attr({
-                offset: time._x,
-                x:      history[0].x,
-                y:      history[0].y,
-                w:      history[0].w,
-                h:      history[0].h
-            })
-            .bind('EnterFrame', function () {
-                var currentTime = time._x - this.offset,
-                    state       = history[currentTime];
+    function defined(value) { return typeof value !== 'undefined'; }
 
-                this.x = state.x;
-                this.y = state.y;
-                this.w = state.w;
-                this.h = state.h;
+    function spawnGhost(offset, transparency) {
+        if (!defined(transparency)) transparency = .4;
+
+        return Crafty.e('2D, DOM, Color, Multiway')
+            .color('rgba(0,0,255,' + transparency + ')')
+            .attr('offset', defined(offset) ? offset : time._x)
+            .extend(history[0])
+            .bind('EnterFrame', function () {
+                var localTime = time._x - this.offset,
+                    state = history[localTime];
+
+                if (!state) { state = history[Math.floor(localTime)]; }
+
+                if (state) {
+                    this.extend(state);
+                } else {
+                    this.w = this.h = 0;
+                }
             });
+    }
+
+    function pauseTime() {
+        time.isPaused = !time.isPaused;
+
+        if (time.isPaused) {
+            time.attr('dX', 0);
+            protagonist.disableControl()
+                .attr('shadows', [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ].map(function (num) {
+                    return spawnGhost(num, 1 - (num / 10));
+                }));
+        } else {
+            time.attr('dX', 1);
+            protagonist.attr('shadows').forEach(function (shadow) { shadow.destroy(); });
+            delete protagonist.attr('shadows');
+            protagonist.enableControl();
+        }
     }
 
     window.addEventListener('load', function load(event) {
@@ -50,7 +69,7 @@ var protagonist, time, history, ghost;
         Crafty.background('rgb(127, 127, 127)');
 
         time = Crafty.e('2D, Multiway')
-            .attr({ x: 0, y: 0, dX: 1, dY: 0 })
+            .attr({ x: 0, y: 0, dX: 1, dY: 0, isPaused: false })
             .bind('EnterFrame', function () {
                 history[this.x] = {
                     x: protagonist._x,
@@ -61,8 +80,18 @@ var protagonist, time, history, ghost;
                 this.x += this.dX;
             })
             .bind('KeyDown', function(e) {
-                if (e.key == Crafty.keys.G) spawnGhost();
-            })
+                switch (e.key) {
+                    case Crafty.keys.G:
+                        spawnGhost();
+                        break;
+                    case Crafty.keys.SPACE:
+                        pauseTime();
+                        break;
+                    case Crafty.keys.ESC:
+                        Crafty.stop();
+                        break;
+                }
+            });
 
         protagonist = Crafty.e('2D, DOM, Color, Multiway')
             .color('rgb(0,0,255)')

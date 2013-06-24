@@ -15,24 +15,30 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Contact
-    redbmk@gmail.com
+Braden: redbmk@gmail.com
 
 # Notes
-    * This game currently has no name.
-    * It's a game about time travel
-    * The version of crafty.js included was compiled from the develop branch
-      and includes the Shape plugin from https://github.com/luizbills/CraftyShape
+* This game currently has no name.
+* It's a game about time travel.
+* The version of crafty.js included was compiled from the
+  [develop branch](https://github.com/craftyjs/Crafty/tree/develop)
+  and includes the [Shape plugin](https://github.com/luizbills/CraftyShape).
 
 # Controls
-#### Movement
-    w: up
-    s: down
-    a: left
-    d: right
-
-#### Other
-    g: spawn a ghost that repeats your comands from the start
+* Movement
+    * **w**: up
+    * **s**: down
+    * **a**: left
+    * **d**: right
+* Other
+    * **g**: spawn a ghost that repeats your comands from the start
+    * **_spacebar_**: Freeze time
 
 # Changelog
-    Just getting started. You can move a dot around and spawn as many
-    ghosts/clones as you want.
+#### v0.0.2
+* Added ability to freeze time using spacebar.
+* Freezing time creates a trail of where you've just been.
+#### v0.0.1
+* Just getting started.
+* You can move a dot around.
+* You can spawn as many "ghosts" as you want.
