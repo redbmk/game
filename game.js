@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-var protagonist, time, history, ghost;
+var protagonist, history, ghost;
 
 (function() {
     "use strict";
@@ -24,16 +24,25 @@ var protagonist, time, history, ghost;
 
     function defined(value) { return typeof value !== 'undefined'; }
 
-    function spawnGhost(offset, transparency) {
+    function spawnGhost(entity, offset, transparency) {
         if (!defined(transparency)) transparency = .4;
+        if (!defined(entity))       entity       = protagonist;
+        if (!defined(offset))       offset       = entity.time._x;
 
-        return Crafty.e('2D, DOM, Color, Multiway')
+        var ghost = Crafty.e('2D, DOM, Color, Multiway')
             .color('rgba(0,0,255,' + transparency + ')')
-            .attr('offset', defined(offset) ? offset : time._x)
+            .attr({
+                offset:         offset,
+                originalOffset: offset
+            })
             .extend(history[0])
+            .multiway(3, {
+                        K: -90,
+                H: 180, J:  90, L: 0
+            })
             .bind('EnterFrame', function () {
-                var localTime = time._x - this.offset,
-                    state = history[localTime];
+                var localTime = entity.time._x - this.offset,
+                    state     = history[localTime];
 
                 if (!state) { state = history[Math.floor(localTime)]; }
 
@@ -42,24 +51,47 @@ var protagonist, time, history, ghost;
                 } else {
                     this.w = this.h = 0;
                 }
-            });
+            })
+            .disableControl();
+
+        return ghost;
     }
 
-    function pauseTime() {
-        time.isPaused = !time.isPaused;
+    function pauseTime(entity) {
+        if (!defined(entity)) entity = protagonist;
+        entity.time.isPaused = !entity.time.isPaused;
 
-        if (time.isPaused) {
-            time.attr('dX', 0);
-            protagonist.disableControl()
-                .attr('shadows', [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ].map(function (num) {
-                    return spawnGhost(num, 1 - (num / 10));
+        if (entity.time.isPaused) {
+            entity.time.attr('dX', 0);
+            entity.disableControl()
+                .attr('shadows', [ 2, 3, 4, 5, 6, 7, 8, 9 ].map(function (num) {
+                    return spawnGhost(entity, num, 1 - (num / 10)).enableControl();
                 }));
         } else {
-            time.attr('dX', 1);
-            protagonist.attr('shadows').forEach(function (shadow) { shadow.destroy(); });
-            delete protagonist.attr('shadows');
-            protagonist.enableControl();
+            entity.time.attr('dX', 1);
+            entity.attr('shadows').forEach(function (shadow) { shadow.destroy(); });
+            delete entity.attr('shadows');
+            entity.enableControl();
         }
+    }
+
+    function createTimeElement(entity) {
+        return Crafty.e('2D, Multiway')
+            .attr({ x: 0, y: 0, dX: 1, dY: 0, isPaused: false })
+            .bind('EnterFrame', function () {
+                //getting tricky...changing "time" can kill the ghost. what happens when in two places at once?
+                //time needs to be relative. Maybe use x/y coordinates?? x could be the overall time and y could be local time?
+                //or each instance could have their own timeline perhaps (e.g. the offset)
+                //or "history" could keep track of time for each instance (e.g. history[0] = { ghost: {x:1,y:2,etc:etc}, protagonist: {x:10,y:100,etc:etc} };)
+                //      ...i don't think this one makes sense.
+                history[this.x] = {
+                    x: entity._x,
+                    y: entity._y,
+                    w: entity._w,
+                    h: entity._h
+                };
+                this.x += this.dX;
+            });
     }
 
     window.addEventListener('load', function load(event) {
@@ -67,31 +99,6 @@ var protagonist, time, history, ghost;
 
         Crafty.init();
         Crafty.background('rgb(127, 127, 127)');
-
-        time = Crafty.e('2D, Multiway')
-            .attr({ x: 0, y: 0, dX: 1, dY: 0, isPaused: false })
-            .bind('EnterFrame', function () {
-                history[this.x] = {
-                    x: protagonist._x,
-                    y: protagonist._y,
-                    w: protagonist._w,
-                    h: protagonist._h
-                };
-                this.x += this.dX;
-            })
-            .bind('KeyDown', function(e) {
-                switch (e.key) {
-                    case Crafty.keys.G:
-                        spawnGhost();
-                        break;
-                    case Crafty.keys.SPACE:
-                        pauseTime();
-                        break;
-                    case Crafty.keys.ESC:
-                        Crafty.stop();
-                        break;
-                }
-            });
 
         protagonist = Crafty.e('2D, DOM, Color, Multiway')
             .color('rgb(0,0,255)')
@@ -103,6 +110,37 @@ var protagonist, time, history, ghost;
             .multiway(5, {
                         W: -90,
                 A: 180, S:  90, D: 0
+            })
+            .bind('EnterFrame', function() {
+                var lastShadow;
+                if (!this.time.isPaused) return;
+
+                if (Crafty.keydown[Crafty.keys.LEFT_ARROW]) {
+                    lastShadow = this.shadows[this.shadows.length - 1];
+                    if (lastShadow.offset < this.time._x - lastShadow.originalOffset) {
+                        this.shadows.forEach(function (shadow) { ++shadow.offset; });
+                    }
+                }
+
+                if (Crafty.keydown[Crafty.keys.RIGHT_ARROW]) {
+                    if (this.shadows[0].offset > this.shadows[0].originalOffset) {
+                        this.shadows.forEach(function (shadow) { --shadow.offset; });
+                    }
+                }
+            })
+            .bind('KeyDown', function(e) {
+                switch (e.key) {
+                    case Crafty.keys.G:
+                        spawnGhost(this);
+                        break;
+                    case Crafty.keys.SPACE:
+                        pauseTime(this);
+                        break;
+                    case Crafty.keys.ESC:
+                        Crafty.stop();
+                        break;
+                }
             });
+        protagonist.attr('time', createTimeElement(protagonist));
     }, false);
 })();
