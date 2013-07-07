@@ -70,7 +70,7 @@ var protagonist, history, ghost;
         } else {
             entity.time.attr('dX', 1);
             entity.attr('shadows').forEach(function (shadow) { shadow.destroy(); });
-            delete entity.attr('shadows');
+            entity.attr('shadows', null);
             entity.enableControl();
         }
     }
@@ -94,11 +94,46 @@ var protagonist, history, ghost;
             });
     }
 
+    function drawClock(time) {
+        Crafty.e('2D, DOM, Shape')
+            .circle(40)
+            .color('white')
+            .attr({ x: 11, y: 11 });
+
+        var hand = Crafty.e('2D, DOM, Shape')
+            .rect(2, 30)
+            .color('black')
+            .attr({ x: 51, y: 50, rotation: 180 })
+            .bind('EnterFrame', function () {
+                this.rotation = time.x;
+            });
+
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 85, y: 50, w: 3, h: 3});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 15, y: 50, w: 3, h: 3});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 50, y: 15, w: 3, h: 3});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 50, y: 85, w: 3, h: 3});
+
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 81, y: 32, w: 2, h: 2});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 81, y: 68, w: 2, h: 2});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 19, y: 32, w: 2, h: 2});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 19, y: 68, w: 2, h: 2});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 32, y: 81, w: 2, h: 2});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 68, y: 81, w: 2, h: 2});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 32, y: 19, w: 2, h: 2});
+        Crafty.e('2D, DOM, Color').color('rgb(0,0,0)').attr({ x: 68, y: 19, w: 2, h: 2});
+    }
+
     window.addEventListener('load', function load(event) {
         window.removeEventListener('load', load, false);
 
         Crafty.init();
         Crafty.background('rgb(127, 127, 127)');
+
+        Crafty.e('2D, DOM, Text')
+            .attr({ x: 8, y: 8 })
+            .bind('EnterFrame', function () {
+                this.text(new Date().getSeconds());
+            });
 
         protagonist = Crafty.e('2D, DOM, Color, Multiway')
             .color('rgb(0,0,255)')
@@ -113,18 +148,25 @@ var protagonist, history, ghost;
             })
             .bind('EnterFrame', function() {
                 var lastShadow;
-                if (!this.time.isPaused) return;
 
                 if (Crafty.keydown[Crafty.keys.LEFT_ARROW]) {
-                    lastShadow = this.shadows[this.shadows.length - 1];
-                    if (lastShadow.offset < this.time._x - lastShadow.originalOffset) {
-                        this.shadows.forEach(function (shadow) { ++shadow.offset; });
+                    if (this.time.isPaused) {
+                        lastShadow = this.shadows[this.shadows.length - 1];
+                        if (lastShadow.offset < this.time._x - lastShadow.originalOffset) {
+                            this.shadows.forEach(function (shadow) { ++shadow.offset; });
+                        }
+                    } else {
+                        this.time.dX -= .25;
                     }
                 }
 
                 if (Crafty.keydown[Crafty.keys.RIGHT_ARROW]) {
-                    if (this.shadows[0].offset > this.shadows[0].originalOffset) {
-                        this.shadows.forEach(function (shadow) { --shadow.offset; });
+                    if (this.time.isPaused) {
+                        if (this.shadows[0].offset > this.shadows[0].originalOffset) {
+                            this.shadows.forEach(function (shadow) { --shadow.offset; });
+                        }
+                    } else {
+                        this.time.dX += .25;
                     }
                 }
             })
@@ -142,5 +184,7 @@ var protagonist, history, ghost;
                 }
             });
         protagonist.attr('time', createTimeElement(protagonist));
+        drawClock(protagonist.time);
+
     }, false);
 })();

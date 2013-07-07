@@ -33,11 +33,25 @@ Braden: redbmk@gmail.com
 * Time Manipulation
     * _**left arrow** (while time is frozen)_: Move time backward. Stops when you get to the starting point
     * _**right arrow** (while time is frozen)_: Move time forward. Stops when you get to the present time
+    * _**left arrow** (while time is **not** frozen)_: Slow down time. It's possible for time to be in reverse
+    * _**right arrow** (while time is **not** frozen)_: Speed up time.
 * Other
     * **g**: spawn a ghost that repeats your comands from the start
     * **_spacebar_**: Freeze time
+    * **_escape_**: End game (The screen remains the same but everything is disabled. Refresh to start over)
+
+# Known Issues
+* The two clocks are not in sync. When time is moving at normal speed, the internal clock should match the external clock
+* Some weird stuff happens with the history (for ghosts and/or replays) when you play around with time.
 
 # Changelog
+#### v0.0.4
+* You can now manipulate time while moving around
+* Added two time references
+    * The clock gives you a basic reference as to how fast (and what direction) time is moving around you
+    * The numbers are actual seconds in real time. This is meant to be your internal clock
+* Fixed a bug that was making the game break in Firefox
+
 #### v0.0.3
 * Added ability to replay past with left and right arrow keys while time is paused
 * Refactored time a bit so that it's now relative to the player
