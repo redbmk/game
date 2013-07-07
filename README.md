@@ -30,11 +30,18 @@ Braden: redbmk@gmail.com
     * **s**: down
     * **a**: left
     * **d**: right
+* Time Manipulation
+    * _**left arrow** (while time is frozen)_: Move time backward. Stops when you get to the starting point
+    * _**right arrow** (while time is frozen)_: Move time forward. Stops when you get to the present time
 * Other
     * **g**: spawn a ghost that repeats your comands from the start
     * **_spacebar_**: Freeze time
 
 # Changelog
+#### v0.0.3
+* Added ability to replay past with left and right arrow keys while time is paused
+* Refactored time a bit so that it's now relative to the player
+
 #### v0.0.2
 * Added ability to freeze time using spacebar.
 * Freezing time creates a trail of where you've just been.
