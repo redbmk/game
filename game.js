@@ -15,10 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-var protagonist, history, ghost;
-
 (function() {
     "use strict";
+
+    var protagonist, history, ghost;
 
     history = [];
 
